@@ -7,7 +7,7 @@ import piexif
 CONVERT_PNG = False
 
 CAMERA_MAKER = 'FUJIFILM'
-CAM_MODEL = 'X-T5'
+CAM_MODEL = 'X-T4'
 LENS_MAKER = 'Viltrox'
 LENS_MODEL = '23mmF1.4XM'
 
@@ -65,6 +65,11 @@ def transplant_exif(i):
     border_path = os.path.join(BORDER_DIR, i)
     piexif.transplant(image_path, border_path)
 
+def check_orientation(image):
+    orientation = EXIF["0th"].pop(piexif.ImageIFD.Orientation)
+    if orientation == 8:
+        image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
+    return image
 
 def read_image(image):
     global height, width
@@ -104,12 +109,12 @@ if __name__ == '__main__':
         print(i)
         image = read_image(i)
         read_exif(i)
-        ## write statement to check for whether the exif data is of 1.4 aperture
         if aperture == 1.4:
             new_image = vignette_correct(image)
             print("vignette corrected")
         else:
             new_image = image
-        # new_new_image = add_border(new_image)
-        save_image(i, new_image)
+        new_new_image = add_border(new_image)
+        new_new_new_image = check_orientation(new_new_image)
+        save_image(i, new_new_new_image)
         transplant_exif(i)
